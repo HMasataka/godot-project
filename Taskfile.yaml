@@ -1,0 +1,85 @@
+version: "3"
+
+tasks:
+  build:
+    desc: Build the Rust library for Godot
+    dir: rust
+    cmds:
+      - cargo build
+
+  build-release:
+    desc: Build the Rust library for Godot in release mode
+    dir: rust
+    cmds:
+      - cargo build --release
+
+  clean:
+    desc: Clean build artifacts
+    dir: rust
+    cmds:
+      - cargo clean
+
+  check:
+    desc: Check Rust code without building
+    dir: rust
+    cmds:
+      - cargo check
+
+  fmt:
+    desc: Format Rust code
+    dir: rust
+    cmds:
+      - cargo fmt
+
+  clippy:
+    desc: Run Clippy linter on Rust code
+    dir: rust
+    cmds:
+      - cargo clippy
+
+  test:
+    desc: Run Rust tests
+    dir: rust
+    cmds:
+      - cargo test
+
+  godot-run:
+    desc: Run Godot project
+    dir: godot
+    cmds:
+      - godot --headless --quit-after 1 || godot
+
+  dev:
+    desc: Development workflow - build and run
+    deps:
+      - build
+      - godot-run
+
+  copy:
+    desc: |
+      Copy project files from WSL to host using local script.
+
+      NOTE: You need to create .local/copy.sh manually.
+      This file contains path information and is not included in git.
+
+      Sample .local/copy.sh:
+      #!/bin/bash
+      # Copy entire project to Windows host
+      SRC_DIR="/home/masataka/go/src/github.com/HMasataka/meetia"
+      DST_DIR="/mnt/c/Users/YourName/Documents/meetia"
+
+      mkdir -p "$DST_DIR"
+      rsync -av --exclude='.git' --exclude='target' --exclude='node_modules' "$SRC_DIR/" "$DST_DIR/"
+      echo "Project copied to $DST_DIR"
+    deps:
+      - clean
+    cmds:
+      - sh .local/copy.sh
+
+  all:
+    desc: Full build and check pipeline
+    deps:
+      - fmt
+      - clippy
+      - build
+      - test
